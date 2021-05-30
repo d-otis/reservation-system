@@ -15,8 +15,13 @@ RSpec.describe Brand, type: :model do
   end
 
   context "Validations" do
-    it "is valid w/ a name"
-    it "is invalid w/o a name"
+    it "is valid w/ a name" do
+      expect(Brand.new(valid_attrs)).to be_valid
+    end
+
+    it "is invalid w/o a name" do
+      expect(Brand.new).to be_invalid
+    end
   end
 
   context "associations" do
