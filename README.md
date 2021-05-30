@@ -1,4 +1,11 @@
-# README
+# Reservation System
+
+## Todo
+
+- refactor tests to use Factory Bot && Faker
+- make seeds file with Faker
+- handle sessions and authentication (in-house vs Devise)
+- build out controllers and JSON serialization
 
 This README would normally document whatever steps are necessary to get the
 application up and running.
