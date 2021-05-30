@@ -83,5 +83,12 @@ RSpec.describe Reservation, type: :model do
       expect(reservation.items).to eq([item, item_2])
       expect(reservation.items.count).to eq(2)
     end
+
+    it "cannot have the same item twice" do
+      item = Item.create(valid_item_attrs.merge(:brand => brand_1))
+      reservation = Reservation.create(reservation_attrs_with_user)
+      reservation.items << item
+      expect{ reservation.items << item }.to raise_error(ActiveRecord::RecordInvalid)
+    end
   end
 end
