@@ -23,11 +23,32 @@ RSpec.describe Item, type: :model do
   end
 
   context "Validations" do
-    it "is valid with valid attrs"
-    it "is invalid without name"
-    it "is invalid without description"
-    it "is invalid without serial_number"
-    it "is invalid without brand_id"
+    let(:brand) { Brand.new(name: "MOTU") }
+    let(:valid_item_attrs_with_brand) { valid_item_attrs.merge(brand: brand) }
+    let(:item_missing_name) { valid_item_attrs_with_brand.except(:name) }
+    let(:item_missing_description) { valid_item_attrs_with_brand.except(:description) }
+    let(:item_missing_brand) { valid_item_attrs }
+    let(:item_missing_serial_number) { valid_item_attrs.except(:serial_number) }
+
+    it "is valid with valid attrs" do
+      expect(Item.new(valid_item_attrs_with_brand)).to be_valid
+    end
+
+    it "is invalid without name" do
+      expect(Item.new(item_missing_name)).to be_invalid
+    end
+
+    it "is invalid without description" do
+      expect(Item.new(item_missing_description)).to be_invalid
+    end
+
+    it "is invalid without serial_number" do
+      expect(Item.new(item_missing_serial_number)).to be_invalid
+    end
+
+    it "is invalid without brand" do
+      expect(Item.new(item_missing_brand)).to be_invalid
+    end
   end
 
   context "Associations" do
