@@ -1,12 +1,8 @@
 require 'rails_helper'
+require 'item_examples'
 
 RSpec.describe Item, type: :model do
-
-  let(:valid_attrs) do {
-    :name => "M4 Audio Interface",
-    :description => "Vestibulum id ligula porta felis euismod semper.",
-    :serial_number => "xyz123"
-  } end
+  include_examples "item examples"
 
   context "Attributes" do
     it "has a name attr"
@@ -26,7 +22,7 @@ RSpec.describe Item, type: :model do
   context "Associations" do
     it "belongs to a Brand" do
       brand = Brand.create(name: "MOTU")
-      item = Item.create(valid_attrs.merge(brand_id: brand.id))
+      item = Item.create(valid_item_attrs.merge(brand_id: brand.id))
       expect(item.brand).to eq(brand)
     end
   end
