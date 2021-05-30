@@ -9,7 +9,8 @@ RSpec.describe Reservation, type: :model do
   include_examples "item examples"
 
   let(:reservation_attrs_with_user) { valid_reservation_attrs.merge(user: test_user) }
-  let(:brand) { Brand.create(name: "Shure") }
+  let(:brand_1) { Brand.create(name: "MOTU") }
+  let(:brand_2) { Brand.create(name: "Shure") }
 
   context "Attributes" do
     it "has a start_time attribute" do
@@ -74,11 +75,13 @@ RSpec.describe Reservation, type: :model do
     end
     
     it "has many Items" do
-      item = Item.create(valid_item_attrs.merge(:brand => brand))
+      item = Item.create(valid_item_attrs.merge(:brand => brand_1))
+      item_2 = Item.create(more_valid_item_attrs.merge(:brand => brand_2))
       reservation = Reservation.create(reservation_attrs_with_user)
       reservation.items << item
-      expect(reservation.items.include?(item)).to be(true)
-      expect(reservation.items.count).to eq(1)
+      reservation.items << item_2
+      expect(reservation.items).to eq([item, item_2])
+      expect(reservation.items.count).to eq(2)
     end
   end
 end
