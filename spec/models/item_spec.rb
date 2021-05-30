@@ -5,10 +5,21 @@ RSpec.describe Item, type: :model do
   include_examples "item examples"
 
   context "Attributes" do
-    it "has a name attr"
-    it "has a description attr"
-    it "has a serial_number attr"
-    it "has a brand attr"
+    it "has a name attr" do
+      expect(Item.new).to respond_to(:name)
+    end
+
+    it "has a description attr" do
+      expect(Item.new).to respond_to(:description)
+    end
+
+    it "has a serial_number attr" do
+      expect(Item.new).to respond_to(:serial_number)
+    end
+
+    it "has a brand attr" do
+      expect(Item.new).to respond_to(:brand)
+    end
   end
 
   context "Validations" do
