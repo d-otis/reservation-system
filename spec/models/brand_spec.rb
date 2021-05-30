@@ -9,7 +9,9 @@ RSpec.describe Brand, type: :model do
   } end
 
   context "Attributes" do
-    it "has name attr"
+    it "has name attr" do
+      expect(Brand.new).to respond_to(:name)
+    end
   end
 
   context "Validations" do
