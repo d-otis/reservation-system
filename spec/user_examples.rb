@@ -9,4 +9,6 @@ RSpec.shared_examples "user examples" do
       # :password_confirmation => "crazy!1234%^&"
     }
   end
+
+  let(:test_user) { User.create(valid_user_attrs) }
 end
