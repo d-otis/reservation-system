@@ -1,8 +1,10 @@
 require 'rails_helper'
 require 'user_examples'
+require 'reservation_examples'
 
 RSpec.describe User, type: :model do
   include_examples "user examples"
+  include_examples "reservation examples"
 
   context "Attributes" do
     it "has first_name attr" do
@@ -52,6 +54,15 @@ RSpec.describe User, type: :model do
 
     it "is invalid w/o is_admin" do
       expect(User.new(missing_email)).to be_invalid
+    end
+  end
+
+  context "Associations" do
+    it "can have many reservations" do
+      reservation_1 = test_user.reservations.create(valid_reservation_attrs)
+      reservation_2 = test_user.reservations.create(valid_reservation_attrs)
+      expect(test_user.reservations.count).to eq(2)
+      expect(test_user.reservations).to eq([reservation_1, reservation_2])
     end
   end
 end
