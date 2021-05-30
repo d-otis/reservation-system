@@ -1,7 +1,9 @@
 require 'rails_helper'
+require 'user_examples'
 
 RSpec.describe User, type: :model do
-  # pending "add some examples to (or delete) #{__FILE__}"
+  include_examples "user examples"
+
   context "Attributes" do
     it "has first_name attr" do
       expect(User.new).to respond_to(:first_name)
@@ -22,29 +24,18 @@ RSpec.describe User, type: :model do
   end
 
   context "Validations" do
-    let(:valid_attrs) do 
-      {
-        :first_name => "Patsy",
-        :last_name => "Cline",
-        :email => "bluemoonkentucky@gmail.com",
-        :is_admin => true
-        # :password => "crazy!1234%^&",
-        # :password_confirmation => "crazy!1234%^&"
-      }
-    end
-
-    let(:missing_first_name) { valid_attrs.except(:first_name) }
-    let(:missing_last_name) { valid_attrs.except(:last_name) }
-    let(:missing_email) { valid_attrs.except(:email) }
-    let(:missing_is_admin) { valid_attrs.except(:is_admin) }
+    let(:missing_first_name) { valid_user_attrs.except(:first_name) }
+    let(:missing_last_name) { valid_user_attrs.except(:last_name) }
+    let(:missing_email) { valid_user_attrs.except(:email) }
+    let(:missing_is_admin) { valid_user_attrs.except(:is_admin) }
 
     it "is valid w/ valid attributes" do
-      expect(User.new(valid_attrs)).to be_valid
+      expect(User.new(valid_user_attrs)).to be_valid
     end
 
     it "is invalid when email is already registered" do
-      User.create(valid_attrs)
-      expect(User.new(valid_attrs)).to be_invalid
+      User.create(valid_user_attrs)
+      expect(User.new(valid_user_attrs)).to be_invalid
     end
 
     it "is invalid w/o first_name" do
