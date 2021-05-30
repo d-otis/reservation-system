@@ -17,8 +17,12 @@ RSpec.describe Item, type: :model do
       expect(Item.new).to respond_to(:serial_number)
     end
 
-    it "has a brand attr" do
+    it "has a brand macro attr" do
       expect(Item.new).to respond_to(:brand)
+    end
+
+    it "has a brand_id attribute" do
+      expect(Item.new).to respond_to(:brand_id)
     end
   end
 
