@@ -32,37 +32,44 @@ RSpec.describe User, type: :model do
     let(:missing_is_admin) { valid_user_attrs.except(:is_admin) }
 
     it "is valid w/ valid attributes" do
-      expect(User.new(valid_user_attrs)).to be_valid
+      user = build(:user)
+      expect(user).to be_valid
     end
 
     it "is invalid when email is already registered" do
-      User.create(valid_user_attrs)
-      expect(User.new(valid_user_attrs)).to be_invalid
+      attrs = attributes_for(:user)
+      existing_email = User.create(attrs).email
+      expect(User.new(attrs.merge(email: existing_email))).to be_invalid
     end
 
     it "is invalid w/o first_name" do
-      expect(User.new(missing_first_name)).to be_invalid
+      user = build(:user, :first_name => nil)
+      expect(user).to be_invalid
     end
 
     it "is invalid w/o last_name" do
-      expect(User.new(missing_last_name)).to be_invalid
+      user = build(:user, :last_name => nil)
+      expect(user).to be_invalid
     end
 
     it "is invalid w/o email" do
-      expect(User.new(missing_email)).to be_invalid
+      user = build(:user, :email => nil)
+      expect(user).to be_invalid
     end
 
     it "is invalid w/o is_admin" do
-      expect(User.new(missing_email)).to be_invalid
+      user = build(:user, :is_admin => nil)
+      expect(user).to be_invalid
     end
   end
 
   context "Associations" do
     it "can have many reservations" do
-      reservation_1 = test_user.reservations.create(valid_reservation_attrs)
-      reservation_2 = test_user.reservations.create(valid_reservation_attrs)
-      expect(test_user.reservations.count).to eq(2)
-      expect(test_user.reservations).to eq([reservation_1, reservation_2])
+      user = create(:user)
+      reservation_1 = user.reservations.create(valid_reservation_attrs)
+      reservation_2 = user.reservations.create(valid_reservation_attrs)
+      expect(user.reservations.count).to eq(2)
+      expect(user.reservations).to eq([reservation_1, reservation_2])
     end
   end
 end
