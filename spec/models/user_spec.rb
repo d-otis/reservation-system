@@ -1,9 +1,6 @@
 require 'rails_helper'
-require 'reservation_examples'
 
 RSpec.describe User, type: :model do
-  include_examples "reservation examples"
-
   context "Attributes" do
     it "has first_name attr" do
       expect(User.new).to respond_to(:first_name)
@@ -60,10 +57,10 @@ RSpec.describe User, type: :model do
   context "Associations" do
     it "can have many reservations" do
       user = create(:user)
-      reservation_1 = user.reservations.create(valid_reservation_attrs)
-      reservation_2 = user.reservations.create(valid_reservation_attrs)
+      first_reservation = create(:reservation, :user => user)
+      second_reservation = create(:reservation, :user => user)
       expect(user.reservations.count).to eq(2)
-      expect(user.reservations).to eq([reservation_1, reservation_2])
+      expect(user.reservations).to eq([first_reservation, second_reservation])
     end
   end
 end
