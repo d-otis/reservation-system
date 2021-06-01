@@ -1,17 +1,6 @@
 require 'rails_helper'
-require 'item_examples'
-require 'reservation_examples'
-require 'user_examples'
-require 'brand_examples'
 
 RSpec.describe Item, type: :model do
-  include_examples "item examples"
-  include_examples "reservation examples"
-  include_examples "user examples"
-  include_examples "brand examples"
-
-  let(:valid_item_attrs_with_brand) { valid_item_attrs.merge(brand: brand) }
-
   context "Attributes" do
     it "has a name attr" do
       expect(Item.new).to respond_to(:name)
@@ -35,61 +24,58 @@ RSpec.describe Item, type: :model do
   end
 
   context "Validations" do
-    let(:item_missing_name) { valid_item_attrs_with_brand.except(:name) }
-    let(:item_missing_description) { valid_item_attrs_with_brand.except(:description) }
-    let(:item_missing_brand) { valid_item_attrs }
-    let(:item_missing_serial_number) { valid_item_attrs.except(:serial_number) }
-
     it "is valid with valid attrs" do
-      expect(Item.new(valid_item_attrs_with_brand)).to be_valid
+      valid_item = build(:item)
+      expect(valid_item).to be_valid
     end
 
     it "is invalid without name" do
-      expect(Item.new(item_missing_name)).to be_invalid
+      attrs_missing_name = attributes_for(:item).except(:name)
+      expect(Item.new(attrs_missing_name)).to be_invalid
     end
 
     it "is invalid without description" do
-      expect(Item.new(item_missing_description)).to be_invalid
+      attrs_missing_description = attributes_for(:item).except(:description)
+      expect(Item.new(attrs_missing_description)).to be_invalid
     end
 
     it "is invalid without serial_number" do
-      expect(Item.new(item_missing_serial_number)).to be_invalid
+      attrs_missing_serial = attributes_for(:item).except(:serial_number)
+      expect(Item.new(attrs_missing_serial)).to be_invalid
     end
 
     it "is invalid without brand" do
-      expect(Item.new(item_missing_brand)).to be_invalid
+      attrs_missing_brand = attributes_for(:item).except(:brand)
+      expect(Item.new(attrs_missing_brand)).to be_invalid
     end
   end
 
   context "Associations" do
+    let(:item) { create(:item) }
+    let(:brand) { item.brand }
+    let(:first_reservation) { create(:reservation) }
+    let(:second_reservation) { create(:reservation) }
+
     it "belongs to a Brand" do
-      item = Item.create(valid_item_attrs.merge(brand_id: brand.id))
       expect(item.brand).to eq(brand)
     end
 
     it "belongs to a Reservation" do
-      reservation = test_user.reservations.create(valid_reservation_attrs)
-      item = Item.create(valid_item_attrs_with_brand)
-      item.reservations << reservation
-      expect(item.reservations.include?(reservation)).to be(true)
-      expect(item.reservations).to eq([reservation])
+      item.reservations << first_reservation
+      expect(item.reservations.include?(first_reservation)).to be(true)
+      expect(item.reservations).to eq([first_reservation])
     end
 
     it "can belong to more than one Reservation" do
-      reservation = test_user.reservations.create(valid_reservation_attrs)
-      reservation_2 = test_user.reservations.create(valid_reservation_attrs)
-      item = Item.create(valid_item_attrs_with_brand)
-      item.reservations << reservation
-      item.reservations << reservation_2
+      item.reservations << first_reservation
+      item.reservations << second_reservation
       expect(item.reservations.count).to eq(2)
-      expect(item.reservations).to eq([reservation, reservation_2])
+      expect(item.reservations).to eq([first_reservation, second_reservation])
     end
 
     it "the same Item can only be added to a Reservation once" do
-      reservation = test_user.reservations.create(valid_reservation_attrs)
-      item = Item.create(valid_item_attrs_with_brand)
-      reservation.items << item
-      expect { reservation.items << item }.to raise_error(ActiveRecord::RecordInvalid )
+      first_reservation.items << item
+      expect { first_reservation.items << item }.to raise_error(ActiveRecord::RecordInvalid )
     end
   end
 end
