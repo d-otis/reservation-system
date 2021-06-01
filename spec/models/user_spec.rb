@@ -1,9 +1,7 @@
 require 'rails_helper'
-require 'user_examples'
 require 'reservation_examples'
 
 RSpec.describe User, type: :model do
-  include_examples "user examples"
   include_examples "reservation examples"
 
   context "Attributes" do
@@ -26,11 +24,6 @@ RSpec.describe User, type: :model do
   end
 
   context "Validations" do
-    let(:missing_first_name) { valid_user_attrs.except(:first_name) }
-    let(:missing_last_name) { valid_user_attrs.except(:last_name) }
-    let(:missing_email) { valid_user_attrs.except(:email) }
-    let(:missing_is_admin) { valid_user_attrs.except(:is_admin) }
-
     it "is valid w/ valid attributes" do
       user = build(:user)
       expect(user).to be_valid
