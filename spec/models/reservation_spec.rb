@@ -39,8 +39,8 @@ RSpec.describe Reservation, type: :model do
     end
 
     it "is valid with missing note" do
-      attrs_missing_note = attributes_for(:reservation).except(:note)
-      expect(Reservation.new(attrs_missing_note)).to be_valid
+      reservation_missing_note = build(:reservation, :note => nil)
+      expect(reservation_missing_note).to be_valid
     end
 
     it "is invalid with missing start_time" do
