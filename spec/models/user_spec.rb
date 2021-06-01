@@ -32,7 +32,8 @@ RSpec.describe User, type: :model do
     it "is invalid when email is already registered" do
       attrs = attributes_for(:user)
       existing_email = User.create(attrs).email
-      expect(User.new(attrs.merge(email: existing_email))).to be_invalid
+      attrs_with_existing_email = attrs.merge(:email => existing_email)
+      expect(User.new(attrs_with_existing_email)).to be_invalid
     end
 
     it "is invalid w/o first_name" do
