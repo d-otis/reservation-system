@@ -48,6 +48,11 @@ RSpec.describe User, type: :model do
       expect(user).to be_invalid
     end
 
+    it 'is invalid w/o password' do
+      user = build(:user, :password => nil)
+      expect(user).to be_invalid
+    end
+
     it "is invalid w/o is_admin" do
       user = build(:user, :is_admin => nil)
       expect(user).to be_invalid
