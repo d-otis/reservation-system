@@ -2,8 +2,9 @@ require 'rails_helper'
 
 describe "Authentication", type: :request do
   describe 'POST /authenticate' do
+    let(:user) { create(:user, email:'cooldude99@gmail.com') }
     it 'authenticates the client' do
-      post '/api/v1/authenticate', params: { email: 'cooldude99@gmail.com', password: "asdfasdf" }
+      post '/api/v1/authenticate', params: { email: user.email, password: "asdfasdf" }
 
       expect(response).to have_http_status(:created)
       expect(response_body).to eq({

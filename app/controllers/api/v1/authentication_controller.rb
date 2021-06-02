@@ -2,10 +2,16 @@ class Api::V1::AuthenticationController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
 
   def create
-    puts params.require(:email).inspect
-    puts params.require(:password).inspect
+    user = User.find_by(email: params.require(:email))
 
-    render json: { token: '123' }, status: :created
+    if user
+      token = AuthenticationTokenService.call(user.id)
+      puts params.require(:password).inspect
+
+      render json: { token: token }, status: :created
+    else
+      render json: { error: 'User not found' }, status: :unprocessable_entity
+    end
   end
 
   private
