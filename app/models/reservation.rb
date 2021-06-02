@@ -1,7 +1,7 @@
 class Reservation < ApplicationRecord
   belongs_to :user
 
-  has_many :reservation_items
+  has_many :reservation_items, :dependent => :destroy
   has_many :items, :through => :reservation_items
 
   validates :start_time, :end_time, :presence => true
