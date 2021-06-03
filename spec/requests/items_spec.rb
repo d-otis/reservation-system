@@ -101,5 +101,33 @@ describe "Items API" do
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response_body).to eq( { "errors" => [ "Name can't be blank", "Description can't be blank" ] } )
     end
+
+    it "renders unauthorized error message if non_admin user tries to update an Item"
+  end
+
+  context 'DELETE /items' do
+    it 'successfully deletes Item if user is admin' do
+      delete "/api/v1/items/#{item.id}",
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" }
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(item.id)
+    end
+
+    it 'renders 404 if resource not found' do
+      delete "/api/v1/items/99999",
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq({"errors"=>["Couldn't find Item with 'id'=99999"]})
+    end
+
+    it 'renders unauthorized error message if user is not an admin' do
+      delete "/api/v1/items/#{item.id}",
+      headers: { "Authorization" => "Bearer #{invalid_token}" }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(item.destroyed?).to eq(false)
+    end
   end
 end

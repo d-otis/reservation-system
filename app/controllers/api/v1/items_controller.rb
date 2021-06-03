@@ -27,6 +27,11 @@ class Api::V1::ItemsController < ApplicationController
     end
   end
 
+  def destroy
+    @item.destroy
+    render json: ItemSerializer.new(@item).serializable_hash.to_json, status: :accepted
+  end
+
   private
 
   def item_params
