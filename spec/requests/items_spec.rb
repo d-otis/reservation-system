@@ -1,18 +1,20 @@
 require 'rails_helper'
+require './spec/support/shared_examples/user_examples'
 require './spec/support/shared_examples/items_examples'
+require './spec/support/shared_examples/brand_examples'
 
 describe "Items API" do
+  include_examples "user examples"
   include_examples "items examples"
+  include_examples "brand examples"
 
   context 'GET /items' do
 
-    let(:user) { create(:user) }
-    let(:token) { AuthenticationTokenService.encode(user.id) }
-
     it 'returns all items if valid user' do
       item = create(:item)
+
       get '/api/v1/items',
-        headers: { "Authorization" => "Bearer #{token}" }
+        headers: { "Authorization" => "Bearer #{non_admin_valid_token}" }
 
       expect(response).to have_http_status(:success)
       expect(response_body['data'].size).to eq(1)
@@ -111,6 +113,7 @@ describe "Items API" do
   end
 
   context 'DELETE /items' do
+
     it 'successfully deletes Item if user is admin' do
       delete "/api/v1/items/#{item.id}",
       headers: { "Authorization" => "Bearer #{admin_valid_token}" }
