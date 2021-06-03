@@ -1,6 +1,7 @@
 class Api::V1::ItemsController < ApplicationController
   before_action :authenticate_user, :except => :index
   before_action :check_admin_privileges, :except => :index
+  before_action :set_item, :except => [:index, :create]
 
   def index
     @items = Item.all
@@ -30,5 +31,9 @@ class Api::V1::ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:name, :description, :serial_number, :brand_id)
+  end
+
+  def set_item
+    @item = Item.find(params[:id])
   end
 end
