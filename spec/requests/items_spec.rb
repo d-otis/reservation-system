@@ -1,7 +1,11 @@
 require 'rails_helper'
+require './spec/support/shared_examples/items_examples'
 
 describe "Items API" do
+  include_examples "items examples"
+
   context 'GET /items' do
+
     let(:user) { create(:user) }
     let(:token) { AuthenticationTokenService.encode(user.id) }
 
@@ -16,12 +20,6 @@ describe "Items API" do
   end
 
   context 'POST /items' do
-    let(:admin_valid_token) { AuthenticationTokenService.encode(admin_user.id) }
-    let(:non_admin_valid_token) { AuthenticationTokenService.encode(non_admin_user.id) }
-    let(:invalid_token) { AuthenticationTokenService.encode(9999) }
-    let(:admin_user) { create(:user, :is_admin => true) }
-    let(:non_admin_user) { create(:user, :is_admin => false) }
-    let(:brand) { create(:brand) }
 
     it 'authorized user can create an Item' do
       post '/api/v1/items',
@@ -60,13 +58,6 @@ describe "Items API" do
   end
 
   context 'PUT /items/:id' do
-    let(:admin_valid_token) { AuthenticationTokenService.encode(admin_user.id) }
-    let(:non_admin_valid_token) { AuthenticationTokenService.encode(non_admin_user.id) }
-    let(:invalid_token) { AuthenticationTokenService.encode(9999) }
-    let(:admin_user) { create(:user, :is_admin => true) }
-    let(:non_admin_user) { create(:user, :is_admin => false) }
-    let(:brand) { create(:brand) }
-    let(:item) { create(:item) }
 
     it 'successfully updates an item by an authorized and authenticated user' do
       put "/api/v1/items/#{item.id}",
