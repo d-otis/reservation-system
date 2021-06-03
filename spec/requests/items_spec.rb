@@ -3,9 +3,9 @@ require 'rails_helper'
 describe "Items API" do
   context 'GET /items' do
     let(:user) { create(:user) }
+    let(:token) { AuthenticationTokenService.encode(user.id) }
 
     it 'returns all items if valid user' do
-      token = AuthenticationTokenService.encode(user.id)
       item = create(:item)
       get '/api/v1/items',
         headers: { "Authorization" => "Bearer #{token}" }
@@ -23,8 +23,36 @@ describe "Items API" do
   end
 
   context 'POST /items' do
-    it 'authorized user can create an Item'
-    it 'returns forbidden/unauthorized if User is not an admin'
-    it 'returns errors if fields are missing'
+    let(:valid_token) { AuthenticationTokenService.encode(user.id) }
+    let(:invalid_token) { AuthenticationTokenService.encode(9999) }
+    let(:user) { create(:user) }
+    let(:brand) { create(:brand) }
+
+    it 'authorized user can create an Item' do
+      post '/api/v1/items',
+      headers: { "Authorization" => "Bearer #{valid_token}" },
+      params: { "item": attributes_for(:item, :brand_id => brand.id) }
+
+      expect(response).to have_http_status(:created)
+    end
+
+    it 'returns 401 forbidden/unauthorized if User is not an admin' do
+      post '/api/v1/items',
+      headers: { "Authorization" => "Bearer #{invalid_token}" },
+      params: { "item": attributes_for(:item, :brand_id => brand.id) }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns 422 Status JSON errors if fields are missing' do
+      post '/api/v1/items',
+      headers: { "Authorization": "Bearer #{valid_token}" },
+      params: { "item": attributes_for(:item) }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq(
+        { "errors" => [ "Brand must exist" ] }
+      )
+    end
   end
 end
