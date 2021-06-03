@@ -19,7 +19,7 @@ describe "Authentication", type: :request do
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response_body).to eq({
-        'error' => 'param is missing or the value is empty: email'
+        'errors' => ['param is missing or the value is empty: email']
       })
     end
 
@@ -28,7 +28,7 @@ describe "Authentication", type: :request do
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response_body).to eq({
-        'error' => 'param is missing or the value is empty: password'
+        'errors' => ['param is missing or the value is empty: password']
       })
     end
 
