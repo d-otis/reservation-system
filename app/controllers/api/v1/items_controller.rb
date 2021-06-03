@@ -1,5 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
   before_action :authenticate_user
+  before_action :check_admin_privileges
 
   def index
     @items = Item.all

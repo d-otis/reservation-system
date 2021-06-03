@@ -23,20 +23,22 @@ describe "Items API" do
   end
 
   context 'POST /items' do
-    let(:valid_token) { AuthenticationTokenService.encode(user.id) }
+    let(:admin_valid_token) { AuthenticationTokenService.encode(admin_user.id) }
+    let(:non_admin_valid_token) { AuthenticationTokenService.encode(non_admin_user.id) }
     let(:invalid_token) { AuthenticationTokenService.encode(9999) }
-    let(:user) { create(:user) }
+    let(:admin_user) { create(:user, :is_admin => true) }
+    let(:non_admin_user) { create(:user, :is_admin => false) }
     let(:brand) { create(:brand) }
 
     it 'authorized user can create an Item' do
       post '/api/v1/items',
-      headers: { "Authorization" => "Bearer #{valid_token}" },
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
 
       expect(response).to have_http_status(:created)
     end
 
-    it 'returns 401 forbidden/unauthorized if User is not an admin' do
+    it 'returns 401 Forbidden if User not authenticated' do
       post '/api/v1/items',
       headers: { "Authorization" => "Bearer #{invalid_token}" },
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
@@ -44,9 +46,17 @@ describe "Items API" do
       expect(response).to have_http_status(:unauthorized)
     end
 
+    it 'returns 401 Forbidden if User is not an admin' do
+      post '/api/v1/items',
+      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" },
+      params: { "item": attributes_for(:item, :brand_id => brand.id) }
+  
+      expect(response).to have_http_status(:unauthorized)
+    end
+
     it 'returns 422 Status JSON errors if fields are missing' do
       post '/api/v1/items',
-      headers: { "Authorization": "Bearer #{valid_token}" },
+      headers: { "Authorization": "Bearer #{admin_valid_token}" },
       params: { "item": attributes_for(:item) }
 
       expect(response).to have_http_status(:unprocessable_entity)
@@ -54,5 +64,9 @@ describe "Items API" do
         { "errors" => [ "Brand must exist" ] }
       )
     end
+  end
+
+  context 'PUT /items' do
+    it 'successfully updates an item by an authorized and authenticated user'
   end
 end
