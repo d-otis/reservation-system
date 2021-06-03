@@ -10,7 +10,7 @@ describe "Authentication", type: :request do
 
       expect(response).to have_http_status(:created)
       expect(response_body).to eq({
-        "token"=> AuthenticationTokenService.call(user.id)
+        "token"=> AuthenticationTokenService.encode(user.id)
       })
     end
 
