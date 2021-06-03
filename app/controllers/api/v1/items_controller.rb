@@ -18,6 +18,14 @@ class Api::V1::ItemsController < ApplicationController
     end
   end
 
+  def update
+    if @item.update(item_params)
+      render json: ItemSerializer.new(@item).serializable_hash.to_json, status: :ok
+    else
+      render json: { errors: @item.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def item_params

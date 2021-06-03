@@ -59,7 +59,56 @@ describe "Items API" do
     end
   end
 
-  context 'PUT /items' do
-    it 'successfully updates an item by an authorized and authenticated user'
+  context 'PUT /items/:id' do
+    let(:admin_valid_token) { AuthenticationTokenService.encode(admin_user.id) }
+    let(:non_admin_valid_token) { AuthenticationTokenService.encode(non_admin_user.id) }
+    let(:invalid_token) { AuthenticationTokenService.encode(9999) }
+    let(:admin_user) { create(:user, :is_admin => true) }
+    let(:non_admin_user) { create(:user, :is_admin => false) }
+    let(:brand) { create(:brand) }
+    let(:item) { create(:item) }
+
+    it 'successfully updates an item by an authorized and authenticated user' do
+      put "/api/v1/items/#{item.id}",
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      params: { 
+        item: { 
+          name: "New Name", 
+          description: "New Description", 
+          serial_number: "New Serial" 
+        } 
+      }
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'renders 404 if Item not found in database' do
+      put '/api/v1/items/9999',
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      params: {
+        item: {
+          name: "New Name",
+          description: "New Description",
+          serial_number: "New Serial"
+        }
+      }
+      
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq( { "errors"=>[ "Couldn't find Item with 'id'=9999" ] } )
+    end
+
+    it 'renders 422 if any required attributes/params are missing' do
+      put "/api/v1/items/#{item.id}",
+      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      params: {
+        item: {
+          name: "",
+          description: "",
+          serial_number: ""
+        }
+      }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq( { "errors" => [ "Name can't be blank", "Description can't be blank" ] } )
+    end
   end
 end
