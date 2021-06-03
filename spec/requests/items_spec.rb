@@ -102,7 +102,12 @@ describe "Items API" do
       expect(response_body).to eq( { "errors" => [ "Name can't be blank", "Description can't be blank" ] } )
     end
 
-    it "renders unauthorized error message if non_admin user tries to update an Item"
+    it "renders unauthorized error message if non_admin user tries to update an Item" do
+      put "/api/v1/items/#{item.id}",
+      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   context 'DELETE /items' do
