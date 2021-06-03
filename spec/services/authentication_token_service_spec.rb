@@ -19,4 +19,13 @@ RSpec.describe AuthenticationTokenService do
       ])
     end
   end
+
+  describe '.decode' do
+    it 'decodes JWT sent from client & returns user_id' do
+      token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo5OTl9.PTh8OJetG_17eAd3aKCcac7s5uL_mKomIhqnPPDPs0U"
+      user_id = described_class.decode(token)
+
+      expect(user_id).to eq(999)
+    end
+  end
 end
