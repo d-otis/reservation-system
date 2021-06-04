@@ -1,6 +1,8 @@
 require 'rails_helper'
+require './spec/support/shared_examples/user_examples'
 
 describe 'Reservations API', type: :request do
+  include_examples "user examples"
 
   context 'GET /reservations' do
     let(:first_user) { create(:user) }
@@ -36,6 +38,46 @@ describe 'Reservations API', type: :request do
 
       expect(response_body['data'].size).to eq(0)
       expect(response_body).to eq( { "data" => [] } )
+    end
+  end
+
+  context 'POST /reservations' do
+    let(:first_item) { create(:item) }
+    let(:second_item) { create(:item) }
+    let(:res_attrs) { attributes_for(:reservation) }
+
+    it 'successfully allows authenticated user to create reservation' do
+      post '/api/v1/reservations',
+      headers: {
+        "Authorization" => "Bearer #{non_admin_valid_token}"
+      },
+      params: { 
+        reservation: res_attrs.merge(:item_ids => [ first_item.id, second_item.id ]) 
+      }
+
+      expect(response).to have_http_status(:created)
+      expect(response_body['data']['relationships']['items']['data'].size).to eq(2)
+    end
+
+    it 'returns error status and message when unauthenticated attempts to create reservation' do
+      post '/api/v1/reservations',
+      headers: { "Authorization" => "Bearer #{invalid_token}" },
+      params: {
+        reservation: attributes_for(:reservation).merge(:item_ids => [ first_item.id, second_item.id ], :user_id => user.id) 
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns error when missing required params' do
+      post '/api/v1/reservations',
+      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" },
+      params: {
+        reservation: attributes_for(:reservation).except(:start_time).merge(:item_ids => [ first_item.id, second_item.id ]) 
+      }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({"errors"=>["Start time can't be blank"]})
     end
   end
 end

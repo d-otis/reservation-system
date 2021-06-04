@@ -1,5 +1,5 @@
 class Api::V1::ReservationsController < ApplicationController
-  before_action :set_reservation, :except => :index
+  before_action :set_reservation, :except => [:index, :create]
   before_action :authenticate_user
 
   def show
@@ -12,6 +12,13 @@ class Api::V1::ReservationsController < ApplicationController
   end
 
   def create
+    reservation = Reservation.new(reservation_params.merge(:user => @user))
+
+    if reservation.save
+      render json: ReservationSerializer.new(reservation).serializable_hash.to_json, status: :created
+    else
+      render json: { errors: reservation.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def update
@@ -24,5 +31,9 @@ class Api::V1::ReservationsController < ApplicationController
 
   def set_reservation
     @reservation = Reservation.find(params[:id])
+  end
+
+  def reservation_params
+    params.require(:reservation).permit(:start_time, :end_time, :note, :user_id, :item_ids => [])
   end
 end
