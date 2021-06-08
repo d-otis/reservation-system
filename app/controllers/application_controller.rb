@@ -2,6 +2,7 @@ class ApplicationController < ActionController::API
   include ActionController::HttpAuthentication::Token
   rescue_from ActiveRecord::RecordNotFound, with: :resource_not_found
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
+  rescue_from JWT::DecodeError, with: :handle_nil_jwt
 
   private
   
@@ -23,5 +24,9 @@ class ApplicationController < ActionController::API
 
   def parameter_missing(e)
     render json: { errors: [ e.message ] }, status: :unprocessable_entity
+  end
+
+  def handle_nil_jwt(e)
+    render json: { errors: [ e.message ] }, status: :unauthorized
   end
 end
