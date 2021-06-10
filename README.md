@@ -4,7 +4,8 @@
 
 - controller tests in addition to pre-existing request specs?
 - error handling for JWT nil value/Auth Bearer blank
-- implement protocol for revoking JWTs
+- implement protocol for revoking JWTs w/ expiry?
+- reformat tests for shared exampes EX - with CRUD/api endpoints/auth tests/nil token tests
 
 This README would normally document whatever steps are necessary to get the
 application up and running.
