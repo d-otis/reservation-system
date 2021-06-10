@@ -174,4 +174,37 @@ describe "Brands API" do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  context "DELETE /brands" do
+    it "admin user can successfully deletes brand and its items" do
+      delete "/api/v1/brands/#{brand.id}",
+      headers: admin_header
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(brand.id)
+    end
+
+    it 'returns forbidden error when not admin' do
+      delete "/api/v1/brands/#{brand.id}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "returns unauthorized error when JWT isn't supplied" do
+      delete "/api/v1/brands/#{brand.id}"
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns 404 if brand not found" do
+      delete "/api/v1/brands/9999",
+      headers: admin_header
+  
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq({
+        "errors" => [ "Couldn't find Brand with 'id'=9999" ]
+      })
+    end
+  end
 end

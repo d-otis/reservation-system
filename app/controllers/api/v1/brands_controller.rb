@@ -27,6 +27,11 @@ class Api::V1::BrandsController < ApplicationController
     end
   end
 
+  def destroy
+    @brand.destroy
+    render json: BrandSerializer.new(@brand).serializable_hash.to_json, status: :accepted
+  end
+
   private
 
   def brand_params
