@@ -75,4 +75,98 @@ describe 'Reservations API', type: :request do
       expect(response_body).to eq({"errors"=>["Start time can't be blank"]})
     end
   end
+
+  context "PUT /reservations" do
+    it "successfully updates an owned reservation" do
+      reservation = reservation_with_items
+      reservation.update(user: non_admin_user)
+
+      put "/api/v1/reservations/#{reservation.id}",
+      headers: {
+        "Authorization" => "Bearer #{AuthenticationTokenService.encode(non_admin_user.id)}"
+      },
+      params: {
+        reservation: {
+          start_time: reservation.start_time,
+          end_time: reservation.end_time,
+          note: "this is a new note!",
+          item_ids: reservation.item_ids.slice(0,2)
+        }
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['attributes']['note']).to eq("this is a new note!")
+      expect(response_body['data']['relationships']['items']['data'].length).to eq(2)
+    end
+
+    it "returns error when user tries to update reservation that is not theirs" do
+      first_user = create(:user, :is_admin => false)
+      second_user = create(:user, :is_admin => false)
+      reservation = create(:reservation, user: first_user)
+
+      put "/api/v1/reservations/#{reservation.id}",
+      headers: {
+        "Authorization" => "Bearer #{AuthenticationTokenService.encode(second_user.id)}"
+      },
+      params: {
+        reservation: {
+          start_time: reservation.start_time,
+          end_time: reservation.end_time,
+          note: "I don't own this reservation!",
+          item_ids: []
+        }
+      }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response_body).to eq({
+        "errors" => ["Insufficient privileges."]
+      })
+    end
+
+    it "successfully updates reservation when user is admin but not owner" do
+      reservation = reservation_with_items
+      reservation.update(user: user)
+
+      put "/api/v1/reservations/#{reservation.id}",
+      headers: admin_header,
+      params: {
+        reservation: {
+          start_time: reservation.start_time,
+          end_time: reservation.end_time,
+          note: "admin editing someone else's reservation",
+          item_ids: reservation.item_ids.slice(0,2)
+        }
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['relationships']['items']['data'].length).to eq(2)
+      expect(response_body['data']['attributes']['note']).to eq("admin editing someone else's reservation")
+    end
+
+    it "renders Unprocessable Entity status codes and errors when required params are missing" do
+      put "/api/v1/reservations/#{reservation_with_items.id}",
+      headers: random_user_header
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({
+        "errors" => [ "param is missing or the value is empty: reservation" ]
+      })
+    end
+
+    it "returns error of record not found" do
+      put "/api/v1/reservations/#{999999}",
+      headers: random_user_header
+
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq({
+        "errors" => [ "Couldn't find Reservation with 'id'=999999" ]
+      })
+    end
+  end
+
+  context "DELETE /reservations" do
+    it "successfully deletes a reservation"
+    it "returns error if user doesn't have authorization to delete"
+    it "returns error if record not found"
+  end
 end
