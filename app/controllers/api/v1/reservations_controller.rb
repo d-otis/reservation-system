@@ -31,6 +31,8 @@ class Api::V1::ReservationsController < ApplicationController
   end
 
   def destroy
+    @reservation.destroy
+    render json: ReservationSerializer.new(@reservation).serializable_hash.to_json, status: :accepted
   end
 
   private

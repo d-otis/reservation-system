@@ -180,8 +180,60 @@ describe 'Reservations API', type: :request do
   end
 
   context "DELETE /reservations" do
-    it "successfully deletes a reservation"
-    it "returns error if user doesn't have authorization to delete"
-    it "returns error if record not found"
+    it "successfully deletes a reservation that user owns" do
+      reservation = create(:reservation, :user => user)
+
+      delete "/api/v1/reservations/#{reservation.id}",
+      headers: random_user_header
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(reservation.id)
+    end
+
+    it "returns Unauthorized if user isn't admin and doesn't own reservation" do
+      reservation = create(:reservation, :user => user)
+
+      delete "/api/v1/reservations/#{reservation.id}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "successfully deletes a reservation if user is admin, but doesn't own reservation" do
+      reservation = create(:reservation)
+
+      delete "/api/v1/reservations/#{reservation.id}",
+      headers: admin_header
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(reservation.id)
+    end
+
+    it "returns Unauthorized if JWT is invalid" do
+      reservation = create(:reservation)
+
+      delete "/api/v1/reservations/#{reservation.id}",
+      headers: invalid_header
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns error if record not found" do
+      delete "/api/v1/reservations/#{9234918}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq({
+        "errors" => ["Couldn't find Reservation with 'id'=9234918"]
+      })
+    end
+
+    it "returns error if JWT is nil" do
+      reservation = create(:reservation)
+
+      delete "/api/v1/reservations/#{reservation.id}"
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 end
