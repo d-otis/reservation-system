@@ -76,6 +76,18 @@ describe "Brands API" do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "returns Unauthorized if JWT is invalid" do
+      post "/api/v1/brands",
+      headers: invalid_header,
+      params: {
+        brand: {
+          name: "Make Noise"
+        }
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
     it "returns an error if token isn't supplied" do
       post '/api/v1/brands',
       params: { brand: attributes_for(:brand) }
@@ -151,6 +163,19 @@ describe "Brands API" do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "returns Unauthorized if JWT is invalid" do
+      put "/api/v1/brands/#{brand.id}",
+      headers: invalid_header,
+      params: {
+        brand: {
+          name: "Make Noise"
+        }
+      }
+  
+      expect(response).to have_http_status(:unauthorized)
+    end
+  
   end
 
   context "DELETE /brands" do
@@ -171,6 +196,18 @@ describe "Brands API" do
 
     it "returns unauthorized error when JWT isn't supplied" do
       delete "/api/v1/brands/#{brand.id}"
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns Unauthorized if JWT is invalid" do
+      delete "/api/v1/brands/#{brand.id}",
+      headers: invalid_header,
+      params: {
+        brand: {
+          name: "Make Noise"
+        }
+      }
 
       expect(response).to have_http_status(:unauthorized)
     end

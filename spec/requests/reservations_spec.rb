@@ -162,6 +162,21 @@ describe 'Reservations API', type: :request do
         "errors" => [ "Couldn't find Reservation with 'id'=999999" ]
       })
     end
+
+    it "returns Unauthorized if JWT is invalid" do
+      put "/api/v1/reservations/#{reservation_with_items.id}",
+      headers: invalid_header,
+      params: {
+        reservation: {
+          start_time: reservation_with_items.start_time,
+          end_time: reservation_with_items.end_time,
+          note: "unauthorized JWT",
+          item_ids: reservation_with_items.item_ids.slice(0,2)
+        }
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   context "DELETE /reservations" do
