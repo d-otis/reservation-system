@@ -144,7 +144,9 @@ describe 'Reservations API', type: :request do
     end
 
     it "renders Unprocessable Entity status codes and errors when required params are missing" do
-      put "/api/v1/reservations/#{reservation_with_items.id}",
+      reservation = create(:reservation, :user => user)
+
+      put "/api/v1/reservations/#{reservation.id}",
       headers: random_user_header
 
       expect(response).to have_http_status(:unprocessable_entity)
