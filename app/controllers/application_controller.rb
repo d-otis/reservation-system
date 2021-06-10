@@ -15,7 +15,7 @@ class ApplicationController < ActionController::API
   end
 
   def check_admin_privileges
-    render status: :unauthorized if !@user.is_admin?
+    render status: :forbidden if !@user.is_admin?
   end
 
   def resource_not_found(e)

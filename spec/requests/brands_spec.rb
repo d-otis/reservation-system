@@ -85,7 +85,7 @@ describe "Brands API" do
       },
       params: { brand: attributes_for(:brand) }
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
     end
 
     it "returns an error if token isn't supplied" do

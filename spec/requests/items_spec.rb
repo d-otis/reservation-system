@@ -44,7 +44,7 @@ describe "Items API" do
       headers: { "Authorization" => "Bearer #{non_admin_valid_token}" },
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
   
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
     end
 
     it 'returns 422 Status JSON errors if fields are missing' do
@@ -104,11 +104,11 @@ describe "Items API" do
       expect(response_body).to eq( { "errors" => [ "Name can't be blank", "Description can't be blank" ] } )
     end
 
-    it "renders unauthorized error message if non_admin user tries to update an Item" do
+    it "returns 401 forbidden if non_admin user tries to update an Item" do
       put "/api/v1/items/#{item.id}",
       headers: { "Authorization" => "Bearer #{non_admin_valid_token}" }
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
