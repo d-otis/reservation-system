@@ -99,11 +99,79 @@ describe "Brands API" do
     end
   end
 
-  context "PUT /brands" do
-    it 'returns success when updating a brand with valid admin token'
-    it 'returns unauthorized when token is non-admin'
-    it 'returns error when name is blank'
-    it 'returns error when brand is blank'
-    it 'returns error if JWT is not supplied'
+  context "PUT /brands/:id" do
+    it 'returns success when updating a brand with valid admin token' do
+      put "/api/v1/brands/#{brand.id}",
+      headers: {
+        "Authorization" => "Bearer #{admin_valid_token}"
+      },
+      params: {
+        brand: { name: "Sony" }
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['id'].to_i).to eq(brand.id)
+    end
+
+    it 'returns Record Not Found error if not found' do
+      put "/api/v1/brands/9999",
+      headers: {
+        "Authorization" => "Bearer #{admin_valid_token}"
+      },
+      params: {
+        brand: { name: "Panasonic" }
+      }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq(
+        { "errors" => [ "Couldn't find Brand with 'id'=9999" ] }
+      )
+    end
+
+    it 'returns unauthorized when token is non-admin' do
+      put "/api/v1/brands/#{brand.id}",
+      headers: {
+        "Authorization" => "Bearer #{non_admin_valid_token}"
+      },
+      params: { brand: { name: "Behringer" } }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'returns error when name is blank' do
+      put "/api/v1/brands/#{brand.id}",
+      headers: {
+        "Authorization" => "Bearer #{admin_valid_token}"
+      },
+      params: {
+        brand: { name: "" }
+      }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq(
+        { "errors" => [ "Name can't be blank" ] }
+      )
+    end
+
+    it 'returns error when brand is blank' do
+      put "/api/v1/brands/#{brand.id}",
+      headers: {
+        "Authorization" => "Bearer #{admin_valid_token}"
+      }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq(
+        { "errors" => [ "param is missing or the value is empty: brand" ] }
+      )
+    end
+
+    it 'returns error if JWT is not supplied' do
+      put "/api/v1/brands/#{brand.id}",
+      params: {
+        brand: { name: "Panasonic" }
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 end
