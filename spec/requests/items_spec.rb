@@ -14,7 +14,7 @@ describe "Items API" do
       item = create(:item)
 
       get '/api/v1/items',
-        headers: { "Authorization" => "Bearer #{non_admin_valid_token}" }
+        headers: non_admin_header
 
       expect(response).to have_http_status(:success)
       expect(response_body['data'].size).to eq(1)
@@ -25,7 +25,7 @@ describe "Items API" do
 
     it 'authorized user can create an Item' do
       post '/api/v1/items',
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      headers: admin_header,
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
 
       expect(response).to have_http_status(:created)
@@ -33,7 +33,7 @@ describe "Items API" do
 
     it 'returns 401 Forbidden if User not authenticated' do
       post '/api/v1/items',
-      headers: { "Authorization" => "Bearer #{invalid_token}" },
+      headers: invalid_header,
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
 
       expect(response).to have_http_status(:unauthorized)
@@ -41,7 +41,7 @@ describe "Items API" do
 
     it 'returns 401 Forbidden if User is not an admin' do
       post '/api/v1/items',
-      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" },
+      headers: non_admin_header,
       params: { "item": attributes_for(:item, :brand_id => brand.id) }
   
       expect(response).to have_http_status(:forbidden)
@@ -49,7 +49,7 @@ describe "Items API" do
 
     it 'returns 422 Status JSON errors if fields are missing' do
       post '/api/v1/items',
-      headers: { "Authorization": "Bearer #{admin_valid_token}" },
+      headers: admin_header,
       params: { "item": attributes_for(:item) }
 
       expect(response).to have_http_status(:unprocessable_entity)
@@ -63,7 +63,7 @@ describe "Items API" do
 
     it 'successfully updates an item by an authorized and authenticated user' do
       put "/api/v1/items/#{item.id}",
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      headers: admin_header,
       params: { 
         item: { 
           name: "New Name", 
@@ -77,7 +77,7 @@ describe "Items API" do
 
     it 'renders 404 if Item not found in database' do
       put '/api/v1/items/9999',
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      headers: admin_header,
       params: {
         item: {
           name: "New Name",
@@ -92,7 +92,7 @@ describe "Items API" do
 
     it 'renders 422 if any required attributes/params are missing' do
       put "/api/v1/items/#{item.id}",
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" },
+      headers: admin_header,
       params: {
         item: {
           name: "",
@@ -106,7 +106,7 @@ describe "Items API" do
 
     it "returns 401 forbidden if non_admin user tries to update an Item" do
       put "/api/v1/items/#{item.id}",
-      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" }
+      headers: non_admin_header
 
       expect(response).to have_http_status(:forbidden)
     end
@@ -116,7 +116,7 @@ describe "Items API" do
 
     it 'successfully deletes Item if user is admin' do
       delete "/api/v1/items/#{item.id}",
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" }
+      headers: admin_header
 
       expect(response).to have_http_status(:accepted)
       expect(response_body['data']['id'].to_i).to eq(item.id)
@@ -124,7 +124,7 @@ describe "Items API" do
 
     it 'renders 404 if resource not found' do
       delete "/api/v1/items/99999",
-      headers: { "Authorization" => "Bearer #{admin_valid_token}" }
+      headers: admin_header
 
       expect(response).to have_http_status(:not_found)
       expect(response_body).to eq({"errors"=>["Couldn't find Item with 'id'=99999"]})
@@ -132,7 +132,7 @@ describe "Items API" do
 
     it 'renders unauthorized error message if user is not an admin' do
       delete "/api/v1/items/#{item.id}",
-      headers: { "Authorization" => "Bearer #{invalid_token}" }
+      headers: invalid_header
 
       expect(response).to have_http_status(:unauthorized)
       expect(item.destroyed?).to eq(false)

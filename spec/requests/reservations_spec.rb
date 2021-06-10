@@ -23,18 +23,15 @@ describe 'Reservations API', type: :request do
     end
 
     it 'returns 401 Forbidden if not authenticated' do
-      get '/api/v1/reservations', headers: { "Authorization" => "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0fQ.EH4nK1B1jv96X5-LRniQWg6OYcQzJG50L7YLY856ks4" }
+      get '/api/v1/reservations', 
+      headers: invalid_header
 
       expect(response).to have_http_status(:unauthorized)
     end
 
     it 'returns only owned reservations' do
-      create(:reservation, :user => first_user)
-
       get '/api/v1/reservations',
-      headers: {
-        "Authorization" => "Bearer #{second_user_token}"
-      }
+      headers: non_admin_header
 
       expect(response_body['data'].size).to eq(0)
       expect(response_body).to eq( { "data" => [] } )
@@ -48,9 +45,7 @@ describe 'Reservations API', type: :request do
 
     it 'successfully allows authenticated user to create reservation' do
       post '/api/v1/reservations',
-      headers: {
-        "Authorization" => "Bearer #{non_admin_valid_token}"
-      },
+      headers: random_user_header,
       params: { 
         reservation: res_attrs.merge(:item_ids => [ first_item.id, second_item.id ]) 
       }
@@ -61,7 +56,7 @@ describe 'Reservations API', type: :request do
 
     it 'returns error status and message when unauthenticated attempts to create reservation' do
       post '/api/v1/reservations',
-      headers: { "Authorization" => "Bearer #{invalid_token}" },
+      headers: invalid_header,
       params: {
         reservation: attributes_for(:reservation).merge(:item_ids => [ first_item.id, second_item.id ], :user_id => user.id) 
       }
@@ -71,7 +66,7 @@ describe 'Reservations API', type: :request do
 
     it 'returns error when missing required params' do
       post '/api/v1/reservations',
-      headers: { "Authorization" => "Bearer #{non_admin_valid_token}" },
+      headers: random_user_header,
       params: {
         reservation: attributes_for(:reservation).except(:start_time).merge(:item_ids => [ first_item.id, second_item.id ]) 
       }

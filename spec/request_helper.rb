@@ -14,4 +14,17 @@ module RequestHelper
       "Authorization" => "Bearer #{non_admin_valid_token}"
     }
   end
+
+  def invalid_header
+    {
+      "Authorization" => "Bearer #{invalid_token}"
+    }
+  end
+
+  def random_user_header
+    # random => could be admin or not
+    {
+      "Authorization" => "Bearer #{random_user_token}"
+    }
+  end
 end

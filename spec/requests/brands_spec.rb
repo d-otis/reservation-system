@@ -14,9 +14,7 @@ describe "Brands API" do
       first_item = create(:item, brand: first_brand)
 
       get '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{non_admin_valid_token}"
-      }
+      headers: non_admin_header
 
       expect(response).to have_http_status(:success)
       expect(response_body['data'].length).to eq(2)
@@ -25,9 +23,7 @@ describe "Brands API" do
 
     it "returns successful if User is unauthorized" do
       get '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{invalid_token}}"
-      }
+      headers: invalid_header
 
       expect(response).to have_http_status(:success)
     end
@@ -42,9 +38,7 @@ describe "Brands API" do
   context "POST /brands" do
     it "successfully creates a Brand by authorized user and administrator" do
       post '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      },
+      headers: admin_header,
       params: {
         brand: { name: 'MOTU' }
       }
@@ -55,9 +49,7 @@ describe "Brands API" do
 
     it 'returns error if brand is blank' do
       post '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      }
+      headers: admin_header
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response_body).to eq(
@@ -67,9 +59,7 @@ describe "Brands API" do
 
     it 'returns error if brand name is blank' do
       post '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      },
+      headers: admin_header,
       params: { brand: { name: "" } }
 
       expect(response).to have_http_status(:unprocessable_entity)
@@ -80,9 +70,7 @@ describe "Brands API" do
 
     it "returns an error if user is not an admin" do
       post '/api/v1/brands',
-      headers: {
-        "Authorization" => "Bearer #{non_admin_valid_token}"
-      },
+      headers: non_admin_header,
       params: { brand: attributes_for(:brand) }
 
       expect(response).to have_http_status(:forbidden)
@@ -102,9 +90,7 @@ describe "Brands API" do
   context "PUT /brands/:id" do
     it 'returns success when updating a brand with valid admin token' do
       put "/api/v1/brands/#{brand.id}",
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      },
+      headers: admin_header,
       params: {
         brand: { name: "Sony" }
       }
@@ -115,9 +101,7 @@ describe "Brands API" do
 
     it 'returns Record Not Found error if not found' do
       put "/api/v1/brands/9999",
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      },
+      headers: admin_header,
       params: {
         brand: { name: "Panasonic" }
       }
@@ -130,9 +114,7 @@ describe "Brands API" do
 
     it 'returns unauthorized when token is non-admin' do
       put "/api/v1/brands/#{brand.id}",
-      headers: {
-        "Authorization" => "Bearer #{non_admin_valid_token}"
-      },
+      headers: non_admin_header,
       params: { brand: { name: "Behringer" } }
 
       expect(response).to have_http_status(:forbidden)
@@ -140,9 +122,7 @@ describe "Brands API" do
 
     it 'returns error when name is blank' do
       put "/api/v1/brands/#{brand.id}",
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      },
+      headers: admin_header,
       params: {
         brand: { name: "" }
       }
@@ -155,9 +135,7 @@ describe "Brands API" do
 
     it 'returns error when brand is blank' do
       put "/api/v1/brands/#{brand.id}",
-      headers: {
-        "Authorization" => "Bearer #{admin_valid_token}"
-      }
+      headers: admin_header
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response_body).to eq(

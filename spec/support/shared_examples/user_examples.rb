@@ -5,4 +5,6 @@ RSpec.shared_examples "user examples" do
   let(:non_admin_valid_token) { AuthenticationTokenService.encode(non_admin_user.id) }
   let(:invalid_token) { AuthenticationTokenService.encode(9999) }
   let(:user) { create(:user) }
+  # random as in: could be admin or non-admin
+  let(:random_user_token) { AuthenticationTokenService.encode(user.id) }
 end
