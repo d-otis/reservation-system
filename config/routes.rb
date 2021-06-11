@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       resources :reservations, :except => [:show]
       resources :items, :except => [:show]
       resources :brands, :except => [:show]
+      resources :users, :except => [:show]
       post 'authenticate', to: 'authentication#create'
     end
   end
