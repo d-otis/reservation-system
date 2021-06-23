@@ -49,9 +49,37 @@ describe "Users API" do
   end
 
   context "POST /users" do
-    it "successfully creates a new user"
-    it "returns errors if required user params are missing"
-    it "returns errors if user param is missing"
+    it "successfully creates a new user" do
+      user_attrs = attributes_for(:user).except(:is_admin)
+
+      post '/api/v1/users',
+      params: {
+        user: user_attrs
+      }
+
+      expect(response).to have_http_status(:created)
+      expect(response_body).to be_an_instance_of(Hash)
+      expect(response_body).to have_key('data')
+      expect(response_body['data']['attributes']['email']).to eq(user_attrs[:email])
+    end
+
+    it "returns errors if required user params are missing" do
+      post '/api/v1/users'
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({
+        "errors" => [ "param is missing or the value is empty: user" ]
+      })
+    end
+
+    it "returns errors if user param is missing" do
+      post "/api/v1/users"
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({
+        "errors" => [ "param is missing or the value is empty: user" ]
+      })
+    end
   end
 
   context "PUT /users/:id" do
