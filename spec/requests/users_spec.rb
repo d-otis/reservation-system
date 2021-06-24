@@ -83,12 +83,51 @@ describe "Users API" do
   end
 
   context "PUT /users/:id" do
-    it "allows user to update themselves"
-    it "allows admin users to make another user an admin"
-    it "doesn't allow a user to make themselves an admin"
+    it "allows user to update themselves" do
+      put "/api/v1/users/#{user.id}",
+      headers: random_user_header,
+      params: {
+        user: attributes_for(:user)
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['id'].to_i).to eq(user.id)
+    end
+
+    it "allows admin users to make another user an admin" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: admin_header,
+      params: {
+        user: attributes_for(:user, is_admin: true)
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['attributes']['is_admin']).to eq(true)
+    end
+
+    xit "doesn't allow a user to make themselves an admin" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: non_admin_header,
+      params: {
+        user: attributes_for(:user, is_admin: true)
+      }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "doesn't allow user to update another user"
     it "returns errors if user param is missing"
     it "returns errors if required user params are missing"
     it "returns error if JWT is invalid"
     it "returns error if JWT is no supplied"
+  end
+
+  context "DELETE /users/:id" do
+    it "successfully allows users to delete themselves"
+    it "successfully allows admin user to delete another user"
+    it "doesn't allow user to delete another user"
+    it "returns errors if user isn't found"
+    it "returns errors if JWT is invalid"
+    it "returns errors if no JWT is provided"
   end
 end
