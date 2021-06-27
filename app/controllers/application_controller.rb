@@ -11,7 +11,7 @@ class ApplicationController < ActionController::API
     user_id = AuthenticationTokenService.decode(token)
     @user ||= User.find(user_id)
   rescue ActiveRecord::RecordNotFound
-    render status: :unauthorized
+    render json: { errors: ["Unable to authenticate user."] } , status: :unauthorized
   end
 
   def check_admin_privileges
