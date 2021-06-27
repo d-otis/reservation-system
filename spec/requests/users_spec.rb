@@ -83,15 +83,26 @@ describe "Users API" do
   end
 
   context "PUT /users/:id" do
-    it "allows user to update themselves" do
-      put "/api/v1/users/#{user.id}",
-      headers: random_user_header,
+    it "allows non admin user to update themselves" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: non_admin_header,
       params: {
-        user: attributes_for(:user)
+        user: attributes_for(:user, :is_admin => false)
       }
 
       expect(response).to have_http_status(:success)
-      expect(response_body['data']['id'].to_i).to eq(user.id)
+      expect(response_body['data']['id'].to_i).to eq(non_admin_user.id)
+    end
+
+    it "allows admin user to update themselves" do
+      put "/api/v1/users/#{admin_user.id}",
+      headers: admin_header,
+      params: {
+        user: attributes_for(:user, is_admin: true)
+      }
+
+      expect(response).to have_http_status(:success)
+      expect(response_body['data']['id'].to_i).to eq(admin_user.id)
     end
 
     it "allows admin users to make another user an admin" do
@@ -105,7 +116,7 @@ describe "Users API" do
       expect(response_body['data']['attributes']['is_admin']).to eq(true)
     end
 
-    xit "doesn't allow a user to make themselves an admin" do
+    it "doesn't allow a user to make themselves an admin" do
       put "/api/v1/users/#{non_admin_user.id}",
       headers: non_admin_header,
       params: {
@@ -113,13 +124,78 @@ describe "Users API" do
       }
 
       expect(response).to have_http_status(:forbidden)
+      expect(response_body).to eq({
+        "errors" => [ "Must be admin to execute action." ]
+      })
     end
 
-    it "doesn't allow user to update another user"
-    it "returns errors if user param is missing"
-    it "returns errors if required user params are missing"
-    it "returns error if JWT is invalid"
-    it "returns error if JWT is no supplied"
+    it "doesn't allow non-admin user to update another user" do
+      put "/api/v1/users/#{user.id}",
+      headers: non_admin_header,
+      params: {
+        user: attributes_for(:user)
+      }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response_body).to eq({
+        "errors" => [ "Insufficient privileges." ]
+      })
+    end
+
+    it "allows admin user to update another user" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: admin_header,
+      params: {
+        user: attributes_for(:user)
+      }
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it "returns errors if user param is missing" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({
+        "errors" => [ "param is missing or the value is empty: user" ]
+      })
+    end
+
+    it "returns errors if required user params are missing" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: non_admin_header,
+      params: {
+        user: attributes_for(:user, :email => "", :is_admin => false)
+      }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response_body).to eq({
+        "errors" => [ "Email can't be blank" ]
+      })
+    end
+
+    it "returns error if JWT is invalid" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      headers: invalid_header,
+      params: {
+        user: attributes_for(:user)
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns error if JWT is no supplied" do
+      put "/api/v1/users/#{non_admin_user.id}",
+      params: {
+        user: attributes_for(:user)
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response_body).to eq({
+        "errors" => [ "Nil JSON web token" ]
+      })
+    end
   end
 
   context "DELETE /users/:id" do
