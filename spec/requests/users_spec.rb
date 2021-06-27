@@ -199,11 +199,61 @@ describe "Users API" do
   end
 
   context "DELETE /users/:id" do
-    it "successfully allows users to delete themselves"
-    it "successfully allows admin user to delete another user"
-    it "doesn't allow user to delete another user"
-    it "returns errors if user isn't found"
-    it "returns errors if JWT is invalid"
-    it "returns errors if no JWT is provided"
+    it "successfully allows users to delete themselves" do
+      delete "/api/v1/users/#{non_admin_user.id}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(non_admin_user.id)
+    end
+
+    it "successfully allows admin user to delete another user" do
+      delete "/api/v1/users/#{non_admin_user.id}",
+      headers: admin_header
+
+      expect(response).to have_http_status(:accepted)
+      expect(response_body['data']['id'].to_i).to eq(non_admin_user.id)
+    end
+
+    it "doesn't allow non-admin user to delete another user" do
+      delete "/api/v1/users/#{admin_user.id}",
+      headers: non_admin_header
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response_body).to eq({
+        "errors" => [ "Insufficient privileges." ]
+      })
+    end
+
+    it "returns errors if user isn't found" do
+      invalid_id = 999999
+
+      delete "/api/v1/users/#{invalid_id}",
+      headers: admin_header
+
+      expect(response).to have_http_status(:not_found)
+      expect(response_body).to eq({
+        "errors" => [ "Couldn't find User with 'id'=#{invalid_id}" ]
+      })
+    end
+
+    it "returns errors if JWT is invalid" do
+      delete "/api/v1/users/#{admin_user.id}",
+      headers: invalid_header
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response_body).to eq({
+        "errors" => [ "Unable to authenticate user." ]
+      })
+    end
+
+    it "returns errors if no JWT is provided" do
+      delete "/api/v1/users/#{user.id}"
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response_body).to eq({
+        "errors" => [ "Nil JSON web token" ]
+      })
+    end
   end
 end

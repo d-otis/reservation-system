@@ -26,6 +26,11 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def destroy
+    @user_resource.destroy
+    render json: UserSerializer.new(@user_resource).serializable_hash.to_json, status: :accepted
+  end
+
   private
   
   def user_params
